@@ -32,20 +32,23 @@ client = commands.Bot(command_prefix='!', intents=intents)
 previous_normal_stock = []
 previous_mirage_stock = []
 
-# Role mapping for fruit name -> role ID
-fruit_roles = {}
-ROLES_FILE = "fruit_roles.json"
+# File for saving roles
+ROLES_FILE = "roles.json"
 
-# ---------------- ROLE PERSISTENCE ----------------
+# Load roles from file
 def load_roles():
-    global fruit_roles
     if os.path.exists(ROLES_FILE):
         with open(ROLES_FILE, "r") as f:
-            fruit_roles = json.load(f)
+            return json.load(f)
+    return {}
 
+# Save roles to file
 def save_roles():
     with open(ROLES_FILE, "w") as f:
         json.dump(fruit_roles, f)
+
+# Role mapping for fruit name -> role ID (load from file)
+fruit_roles = load_roles()
 
 # ---------------- STOCK SCRAPER ----------------
 async def fetch_stock():
@@ -125,7 +128,6 @@ async def check_stock():
 @client.event
 async def on_ready():
     print(f"✅ Logged in as {client.user}")
-    load_roles()  # Load roles at startup
     client.loop.create_task(check_stock())
 
 # ---------------- BOT COMMANDS ----------------
@@ -154,5 +156,6 @@ async def listroles(ctx):
     embed = discord.Embed(title="🍍 Tracked Fruit Roles", description=desc, color=discord.Color.green())
     await ctx.send(embed=embed)
 
-# ---------------- START BOT ----------------
+# Run the bot
 client.run(TOKEN)
+
